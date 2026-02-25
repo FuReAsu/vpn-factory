@@ -38,10 +38,6 @@ resource "random_shuffle" "vpn_ports" {
   }
 }
 
-output "randomized_ports" {
-  value = [for s in random_shuffle.vpn_ports.result : tonumber(s)]
-}
-
 //VPC & Networking
 resource "aws_vpc" "vpn-factory-vpc" {
   cidr_block = var.vpc_cidr

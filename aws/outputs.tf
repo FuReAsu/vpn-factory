@@ -7,5 +7,9 @@ output "ssh_keypair_name" {
 }
 
 output "ramdomized_ports" {
-  value = random_shuffle.vpn_ports.result
+  value = [
+    random_shuffle.vpn_ports.result[0],
+    random_shuffle.vpn_ports.result[1],
+    random_shuffle.vpn_ports.result[2]
+  ]
 }
