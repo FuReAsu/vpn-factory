@@ -1,3 +1,6 @@
+//Generate uuid for seeding
+resource "random_uuid" "seed" {}
+
 //Get ami id
 data "aws_ami" "ubuntu" {
   owners = ["099720109477"]
@@ -11,17 +14,32 @@ data "aws_ami" "ubuntu" {
 
 //Get random port numbers for outline and ovpn
 locals {
-  port_pool = range(49152, 65536)
-  port_strings = [ for p in local.port_pool : tostring(p) ]
+  start_port = 49152
+  end_port   = 65536
+  block_size = 1024
+
+  block_starts = [for s in range(local.start_port, local.end_port, local.block_size) : s]
+
+  port_pool = flatten([
+    for s in local.block_starts :
+    range(s, min(s + local.block_size, local.end_port))
+  ])
+
+  port_strings = [for p in local.port_pool : tostring(p)]
 }
 
+//Shuffle the list and get 3 results
 resource "random_shuffle" "vpn_ports" {
-  input = local.port_strings
+  input        = local.port_strings
   result_count = 3
 
   keepers = {
-    instance_id = aws_instance.vpn-factory-server.id
+    seed = random_uuid.seed.result
   }
+}
+
+output "randomized_ports" {
+  value = [for s in random_shuffle.vpn_ports.result : tonumber(s)]
 }
 
 //VPC & Networking
