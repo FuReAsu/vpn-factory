@@ -1,0 +1,8 @@
+instance_type=""
+keypair_name=""
+region=""
+gl_user=""
+gl_pat=""
+access_key=""
+secret_key=""
+vpc_cidr=""
