@@ -6,3 +6,4 @@
 *.tfvars
 *.tfplan
 !example.tfvars
+*tfstate.json
