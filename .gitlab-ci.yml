@@ -1,0 +1,56 @@
+stages:
+  - provision
+  - install
+  - generate
+  - destroy
+
+spec:
+  inputs:
+    cloud-provider:
+      type: string
+      options:
+        - 'aws'
+        - 'gcp'
+        - 'do'
+
+.provision-instance-template:
+  stage: provision
+  image: fureasu346/opentofu:1.11.5
+  script:
+    - cd $[[ inputs.cloud-provider ]]
+    - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
+    - tofu init
+    - tofu plan -out $[[ inputs.cloud-provider ]].tfplan
+    - tofu apply $[[ inputs.cloud-provider ]].tfplan
+    - tofu show -json > $[[ inputs.cloud-provider ]]-${CI_PIPELINE_ID}.json
+  artifacts:
+    paths:
+      - $[[ inputs.cloud-provider ]]-${CI_PIPELINE_ID}.json
+    expire_in: 30 days
+
+aws-provision:
+  rules:
+    - if: $[[ inputs.cloud-provider ]] == 'aws'
+      when: manual
+  extends: .provision-instance-template
+  before_script:
+    - |
+      declare -a VARS=( 'AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'AWS_REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR' )
+      for VAR in "${VARS[@]}"; do
+        if [[ -v $VAR ]]; then 
+          echo "$VAR is set"; 
+          tfvar="${VAR#AWS_}"
+          cat << EOF >> ci.auto.tfvars
+          "$tfvar"="${!VAR}"
+          EOF
+        fi
+      done
+
+.remote-access-template:
+    dependencies: $[[ inputs.cloud-provider ]]-provision
+    before_script:
+      - chmod 400 "$SSH_PRIV_KEY"
+      - mkdir -p ~/.ssh
+      - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
+
+
