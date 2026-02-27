@@ -122,12 +122,14 @@ stages:
   - destroy
 
 .provision-instance-template:
+  needs: []
   stage: provision
   image: 
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
   script:
     - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
+    - cat ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/ci.auto.tfvars
     - tofu init
     - tofu plan -out $[[ inputs.cloud-provider ]].tfplan
     - tofu apply $[[ inputs.cloud-provider ]].tfplan
@@ -141,12 +143,30 @@ stages:
     paths:
       - ${CI_PROJECT_DIR}/.terraform
 
-tear-down:
-  stage: destroy
+.aws-init: &aws-init
   rules:
-    - if: $CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api" 
+    - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
-  needs: []
+  before_script:
+    - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
+    - |
+      declare -a VARS=('AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR')
+      for VAR in "${VARS[@]}"; do
+        if [[ -v $VAR ]]; then 
+          echo "$VAR is set"
+          tfvar="${VAR#AWS_}"
+          printf '%s="%s"\n' "$tfvar" "${!VAR}" >> ci.auto.tfvars
+        fi
+      done
+    - ls ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/ci.auto.tfvars
+
+aws-provision:
+  <<: *aws-init
+  extends: .provision-instance-template
+
+tear-down:
+  <<: *aws-init
+  stage: destroy
   image: 
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
@@ -159,23 +179,6 @@ tear-down:
     key: tofu-files
     paths:
       - ${CI_PROJECT_DIR}/.terraform
-
-aws-provision:
-  rules:
-    - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
-      when: manual
-  extends: .provision-instance-template
-  before_script:
-    - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
-    - |
-      declare -a VARS=('AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR')
-      for VAR in "${VARS[@]}"; do
-        if [[ -v $VAR ]]; then 
-          echo "$VAR is set"
-          tfvar="${VAR#AWS_}"
-          printf '%s="%s"\n' "$tfvar" "${!VAR}" >> ci.auto.tfvars
-        fi
-      done
 
 .remote-access-template:
     dependencies: $[[ inputs.cloud-provider ]]-provision
