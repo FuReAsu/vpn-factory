@@ -1,17 +1,17 @@
 spec:
   inputs:
     cloud-provider:
-      default: 'AWS'
+      default: 'aws'
       type: string
       description: Which cloud provider to use for VPN
       options:
-        - 'AWS'
-        - 'GCP'
-        - 'DO'
+        - 'aws'
+        - 'gcp'
+        - 'do'
     REGION:
       description: AWS region to deploy the instance in
       rules:
-        - if: $[[ inputs.cloud-provider ]] == 'AWS'
+        - if: $[[ inputs.cloud-provider ]] == 'aws'
           default: 'ap-southeast-1'
           options:
             - 'us-east-1'
@@ -53,7 +53,7 @@ spec:
             - 'us-gov-west-1'
             - 'cn-north-1'
             - 'cn-northwest-1'
-        - if: $[[ inputs.cloud-provider ]] == 'GCP'
+        - if: $[[ inputs.cloud-provider ]] == 'gcp'
           default: 'asia-southeast1'
           options:
             - 'africa-south1'
@@ -98,7 +98,7 @@ spec:
             - 'us-west2'
             - 'us-west3'
             - 'us-west4'
-        - if: $[[ inputs.cloud-provider ]] == 'DO'
+        - if: $[[ inputs.cloud-provider ]] == 'do'
           default: 'sgp1'
           options:
             - 'nyc1'
@@ -127,7 +127,6 @@ stages:
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
   script:
-    - cd $[[ inputs.cloud-provider ]]
     - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
     - tofu init
     - tofu plan -out $[[ inputs.cloud-provider ]].tfplan
@@ -162,10 +161,11 @@ tear-down:
 
 aws-provision:
   rules:
-    - if: '"$[[ inputs.cloud-provider ]]" == "AWS" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+    - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
   extends: .provision-instance-template
   before_script:
+    - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
     - |
       declare -a VARS=('AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR')
       for VAR in "${VARS[@]}"; do
