@@ -135,6 +135,23 @@ stages:
     paths:
       - $[[ inputs.cloud-provider ]]-${CI_PIPELINE_ID}.json
     expire_in: 30 days
+  cache:
+    key: tofu-files
+    paths:
+      - ${CI_PROJECT_DIR}/.terraform
+
+tear-down:
+  needs: []
+  stage: destroy
+  image: fureasu346/opentofu:1.11.5
+  script:
+    - tofu init
+    - tofu plan -destroy -out $[[ inputs.cloud-provider ]].destroy.tfplan
+    - tofu apply $[[ inputs.cloud-provider ]].destroy.tfplan
+  cache:
+    key: tofu-files
+    paths:
+      - ${CI_PROJECT_DIR}/.terraform
 
 aws-provision:
   rules:
@@ -160,5 +177,3 @@ aws-provision:
       - chmod 400 "$SSH_PRIV_KEY"
       - mkdir -p ~/.ssh
       - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
-
-
