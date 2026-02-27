@@ -128,21 +128,21 @@ stages:
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
   script:
-    - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
     - tofu init
     - tofu plan -out $[[ inputs.cloud-provider ]].tfplan
     - tofu apply $[[ inputs.cloud-provider ]].tfplan
-    - tofu show -json > $[[ inputs.cloud-provider ]]-${CI_PIPELINE_ID}.json
+    - tofu show -json > ${CI_PIPELINE_ID}.json
   artifacts:
     paths:
-      - $[[ inputs.cloud-provider ]]-${CI_PIPELINE_ID}.json
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provision ]]/${CI_PIPELINE_ID}.json
     expire_in: 30 days
   cache:
     key: tofu-files
     paths:
-      - ${CI_PROJECT_DIR}/.terraform
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/.terraform
 
 .all-init: &all-init
+  - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
   - echo "Setting global variables"
   - printf '%s="%s"\n' "gl_user" "$CI_USER" >> ci.auto.tfvars
   - printf '%s="%s"\n' "gl_pat" "$CI_PAT" >> ci.auto.tfvars
@@ -174,18 +174,22 @@ aws-provision:
 
 tear-down:
   <<: *aws-init
+  needs:
+    - job: $[[ inputs.cloud-provider ]]-provision
+      artifacts: false
+      optional: false
   stage: destroy
   image: 
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
   script:
     - tofu init
-    - tofu plan -destroy -out $[[ inputs.cloud-provider ]].destroy.tfplan
-    - tofu apply $[[ inputs.cloud-provider ]].destroy.tfplan
+    - tofu plan -destroy -out ${CI_PIPELINE_ID}.destroy.tfplan
+    - tofu apply ${CI_PIPELINE_ID}.destroy.tfplan
   cache:
     key: tofu-files
     paths:
-      - ${CI_PROJECT_DIR}/.terraform
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/.terraform
 
 .remote-access-template:
     dependencies: $[[ inputs.cloud-provider ]]-provision
