@@ -151,6 +151,7 @@ tear-down:
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
   script:
+    - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
     - tofu init
     - tofu plan -destroy -out $[[ inputs.cloud-provider ]].destroy.tfplan
     - tofu apply $[[ inputs.cloud-provider ]].destroy.tfplan
