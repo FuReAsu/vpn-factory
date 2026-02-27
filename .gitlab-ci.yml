@@ -150,9 +150,9 @@ stages:
   before_script:
     - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
     - |
-      declare -a VARS=('AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR')
+      declare -a VARS=( 'AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'REGION' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR' )
       for VAR in "${VARS[@]}"; do
-        if [[ -v ${!VAR} ]]; then 
+        if [ -n "${!VAR+x}" ]; then
           echo "$VAR is set"
           tfvar="${VAR#AWS_}"
           printf '%s="%s"\n' "$tfvar" "${!VAR}" >> ci.auto.tfvars
