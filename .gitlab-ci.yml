@@ -127,6 +127,9 @@ stages:
   image: 
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
+  environment:
+    name: $[[ inputs.cloud-provider ]]-$[[ inputs.region ]]
+    on_stop: $[[ inputs.cloud-provider ]]-tear-down
   script:
     - tofu init
     - tofu plan -out $[[ inputs.cloud-provider ]].tfplan
@@ -134,7 +137,7 @@ stages:
     - tofu show -json > ${CI_PIPELINE_ID}.json
   artifacts:
     paths:
-      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provision ]]/${CI_PIPELINE_ID}.json
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/${CI_PIPELINE_ID}.json
     expire_in: 30 days
   cache:
     key: tofu-files
@@ -172,12 +175,14 @@ aws-provision:
   <<: *aws-init
   extends: .provision-instance-template
 
-tear-down:
-  <<: *aws-init
+.tear-down-defaults: &tear-down-defaults
   needs:
     - job: $[[ inputs.cloud-provider ]]-provision
       artifacts: false
       optional: false
+  environment:
+    name: $[[ inputs.cloud-provider ]]-$[[ inputs.region ]]
+    action: stop
   stage: destroy
   image: 
     name: fureasu346/opentofu:v1.11.5
@@ -186,10 +191,19 @@ tear-down:
     - tofu init
     - tofu plan -destroy -out ${CI_PIPELINE_ID}.destroy.tfplan
     - tofu apply ${CI_PIPELINE_ID}.destroy.tfplan
+    - echo "Deleting state file"
+    - |
+      curl --request DELETE \
+        --header "Private-Token: $CI_PAT" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_PIPELINE_ID}"
+    - echo "Deployment torn down and tfstate file deleted"
   cache:
     key: tofu-files
     paths:
       - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/.terraform
+
+aws-tear-down:
+  <<: [*aws-init, *tear-down-defaults]
 
 .remote-access-template:
     dependencies: $[[ inputs.cloud-provider ]]-provision
