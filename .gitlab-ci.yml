@@ -38,13 +38,13 @@ spec:
       description: "VPN server instance type"
       rules:
         - if: $[[ inputs.cloud-provider ]] == 'aws'
-          defaults: 't2.micro'
+          default: 't2.micro'
           options: ['t2.micro', 't3.micro', 't2.small', 't3.small', 't2.medium', 't3.medium']
         - if: $[[ inputs.cloud-provider ]] == 'gcp'
-          defaults: 'e2.micro'
+          default: 'e2.micro'
           options: ['e3.micro', 'e2.small', 'e2.medium']
         - if: $[[ inputs.cloud-provider ]] == 'do'
-          defaults: 's-1vcpu-1gb'
+          default: 's-1vcpu-1gb'
           options: ['s-1vcpu-1gb', 's-1vcpu-512mb-10gb', 's-1vcpu-2gb']
 ---
 stages:
