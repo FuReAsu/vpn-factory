@@ -57,6 +57,11 @@ stages:
   - generate
   - destroy
 
+variables:
+  AWS_SSH_USER: "ubuntu"
+  GCP_SSH_USER: "vpn-factory"
+  DO_SSH_USER: "root"
+
 .provision-instance-template:
   needs: []
   stage: provision
@@ -185,4 +190,4 @@ aws-outline-install:
       when: manual
   extends: .remote-access-template
   variables:
-    SSH_USER: "${AWS_SSH_USER:-ubuntu}"
+    SSH_USER: $AWS_SSH_USER
