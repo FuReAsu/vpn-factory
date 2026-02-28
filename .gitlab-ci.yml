@@ -163,8 +163,7 @@ aws-tear-down:
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - echo "$SSH_PRIV_KEY" > $LOCAL_KEY && chmod 400 $LOCAL_KEY
     - echo "Testing private key file"
-    - cat -A $LOCAL_KEY
-    - ssh-keygen -y -f $LOCAL_KEY" > /dev/null
+    - ssh-keygen -y -f $LOCAL_KEY > /dev/null
     - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
     - printf "%b" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $LOCAL_KEY\n" > ~/.ssh/config
     - cat ~/.ssh/config
