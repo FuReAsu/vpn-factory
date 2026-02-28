@@ -46,6 +46,9 @@ spec:
         - if: $[[ inputs.cloud-provider ]] == 'do'
           default: 's-1vcpu-1gb'
           options: ['s-1vcpu-1gb', 's-1vcpu-512mb-10gb', 's-1vcpu-2gb']
+    initial-keynames:
+      description: "Key names to generate initially. Please enter a comma separated string"
+      type: string
 ---
 stages:
   - provision
@@ -95,6 +98,9 @@ stages:
       done
 
 .aws-init: &aws-init
+  variables:
+    AWS_REGION: $[[ inputs.region ]]
+    AWS_INSTANCE_TYPE: $[[ inputs.instance-type ]]
   rules:
     - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
@@ -105,9 +111,6 @@ stages:
 aws-provision:
   <<: *aws-init
   extends: .provision-instance-template
-  variables:
-    AWS_REGION: $[[ inputs.region ]]
-    AWS_INSTANCE_TYPE: $[[ inputs.instance-type ]]
 
 .tear-down-defaults: &tear-down-defaults
   needs:
@@ -139,8 +142,6 @@ aws-provision:
 
 aws-tear-down:
   <<: [*aws-init, *tear-down-defaults]
-  variables:
-    CONFIRM: "yes"
 
 .remote-access-template:
     dependencies: $[[ inputs.cloud-provider ]]-provision
