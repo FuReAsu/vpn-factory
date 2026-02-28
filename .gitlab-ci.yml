@@ -188,6 +188,7 @@ aws-tear-down:
 
 .outline-key-generate:
   stage: generate
+  image: fureasu346/pipeline-util:v1
   needs:
     - job: $[[ inputs.cloud-provider ]]-outline-install
       artifacts: true
