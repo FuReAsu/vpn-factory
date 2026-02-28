@@ -46,8 +46,8 @@ spec:
         - if: $[[ inputs.cloud-provider ]] == 'do'
           default: 's-1vcpu-1gb'
           options: ['s-1vcpu-1gb', 's-1vcpu-512mb-10gb', 's-1vcpu-2gb']
-    key-names:
-      description: "Key names to generate in VPN servers. Please enter a comma separated string"
+    initial-key-names:
+      description: "Key names to generate initially in VPN servers. Please enter a comma separated string"
       type: string
       default: 'key1,key2'
 ---
@@ -158,7 +158,7 @@ aws-tear-down:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
-    - printf "%s" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $SSH_PRIV_KEY\n" > ~/.ssh/config
+    - printf "%b" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $SSH_PRIV_KEY\n" > ~/.ssh/config
     - cat ~/.ssh/config
     - echo "Testing ssh connection"
     - ssh -o BatchMode=yes instance uptime
