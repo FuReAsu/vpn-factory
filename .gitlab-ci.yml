@@ -181,8 +181,10 @@ aws-tear-down:
         KEYS_PORT=$KEYS_PORT
         bash install-outline.sh
       "
-    - scp instance:./outline-api.json .
+    - scp instance:./outline/outline-api.json .
     - mkdir ${CI_PROJECT_DIR}/outline && mv outline-api.json ${CI_PROJECT_DIR}/outline
+    - echo "Cleaning up install script from remote instance"
+    - ssh instance "rm install-outline.sh"
   artifacts:
     paths:
       - ${CI_PROJECT_DIR}/outline
