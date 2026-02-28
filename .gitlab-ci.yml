@@ -46,10 +46,6 @@ spec:
         - if: $[[ inputs.cloud-provider ]] == 'do'
           default: 's-1vcpu-1gb'
           options: ['s-1vcpu-1gb', 's-1vcpu-512mb-10gb', 's-1vcpu-2gb']
-    initial-key-names:
-      description: "Key names to generate initially in VPN servers. Please enter a comma separated string"
-      type: string
-      default: 'key1,key2'
 ---
 stages:
   - provision
@@ -190,6 +186,18 @@ aws-tear-down:
       - ${CI_PROJECT_DIR}/outline
     expire_in: 30 days
 
+.outline-key-generate:
+  stage: generate
+  variables:
+    KEY_NAME: "outline-${CI_JOB_ID}"
+  script:
+    - API_URL=$(jq -r '.apiUrl' ${CI_PROJECT_DIR}/outline/outline-api.json )
+    - API_URL="$API_URL" KEY_NAME="$KEY_NAME" bash scripts/get-outline-key.sh
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/outline
+    expire_in: 30 days
+
 aws-outline-install:
   <<: *outline-install
   rules:
@@ -198,3 +206,9 @@ aws-outline-install:
   extends: .remote-access-template
   variables:
     SSH_USER: $AWS_SSH_USER
+
+aws-outline-key-generate:
+  extends: .outline-key-generate
+  rules:
+    - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+      when: manual
