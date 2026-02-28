@@ -107,7 +107,7 @@ aws-provision:
   extends: .provision-instance-template
   variables:
     AWS_REGION: $[[ inputs.region ]]
-    AWS_INSTANCE_TYPE: $[[ inputs.instance_type ]]
+    AWS_INSTANCE_TYPE: $[[ inputs.instance-type ]]
 
 .tear-down-defaults: &tear-down-defaults
   needs:
