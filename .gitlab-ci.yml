@@ -87,16 +87,16 @@ stages:
   - printf '%s="%s"\n' "gl_user" "$CI_USER" >> ci.auto.tfvars
   - printf '%s="%s"\n' "gl_pat" "$CI_PAT" >> ci.auto.tfvars
   - |
-      for VAR in "${VARS[@]}"; do
-        if [ -n "${!VAR+x}" ]; then
-          echo "$VAR is set"
-          tfvar="${VAR#AWS_}"
-          tfvar_lc="${tfvar,,}"
-          printf '%s="%s"\n' "$tfvar_lc" "${!VAR}" >> ci.auto.tfvars
-        else
-          echo "$VAR is not set. Using default"
-        fi
-      done
+    for VAR in "${VARS[@]}"; do
+      if [ -n "${!VAR+x}" ]; then
+        echo "$VAR is set"
+        tfvar="${VAR#AWS_}"
+        tfvar_lc="${tfvar,,}"
+        printf '%s="%s"\n' "$tfvar_lc" "${!VAR}" >> ci.auto.tfvars
+      else
+        echo "$VAR is not set. Using default"
+      fi
+    done
 
 .aws-init: &aws-init
   variables:
@@ -145,8 +145,35 @@ aws-tear-down:
   <<: [*aws-init, *tear-down-defaults]
 
 .remote-access-template:
-    dependencies: $[[ inputs.cloud-provider ]]-provision
-    before_script:
-      - chmod 400 "$SSH_PRIV_KEY"
-      - mkdir -p ~/.ssh
-      - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
+  image: fureasu346/pipeline-util:v1
+  dependencies: $[[ inputs.cloud-provider ]]-provision
+  before_script:
+    - echo "Configuring ssh"
+    - INFO_FILE="${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/${CI_PIPELINE_ID}.json"
+    - INSTANCE_IP=$(jq -r '.values.outputs.instance_ip.value' ${INFO_FILE})
+    - chmod 400 "$SSH_PRIV_KEY"
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
+    - printf "%s" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $SSH_PRIV_KEY\n" > ~/.ssh/config
+
+.outline-install: &outline-install
+  stage: install
+  script:
+    - API_PORT=$(jq -r '.values.outputs.randomized_ports.value[0]' ${INFO_FILE})
+    - KEYS_PORT=$(jq -r '.values.outputs.randomized_ports.value[0]' ${INFO_FILE})
+    - echo "Sending script file to remote instance"
+    - scp scripts/install-outline.sh instance:.
+    - ssh -t instance "bash install-outline.sh"
+    - scp instance:./outline-api.json .
+    - mkdir ${CI_PROJECT_DIR}/outline && mv outline-api.json ${CI_PROJECT_DIR}/outline
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/outline
+    expire_in: 30 days
+
+aws-outline-install:
+  <<: *outline-install
+  extends: .remote-access-template
+  variables:
+    SSH_USER: "${AWS_SSH_USER:-ubuntu}"
