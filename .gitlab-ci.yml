@@ -166,7 +166,7 @@ aws-tear-down:
     - printf "%b" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $SSH_PRIV_KEY\n" > ~/.ssh/config
     - cat ~/.ssh/config
     - echo "Testing ssh connection"
-    - ssh -o BatchMode=yes instance uptime
+    - ssh -vvv -o BatchMode=yes instance uptime
 
 .outline-install: &outline-install
   stage: install
