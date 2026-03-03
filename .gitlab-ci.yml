@@ -107,11 +107,26 @@ variables:
     - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
   before_script:
-    - declare -a VARS=( 'AWS_REGION' 'AWS_INSTANCE_TYPE' 'AWS_KEYPAIR_NAME' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR' )
+    - declare -a VARS=( 'AWS_REGION' 'AWS_INSTANCE_TYPE' 'AWS_ACCESS_KEY' 'AWS_SECRET_KEY' 'AWS_VPC_CIDR' )
+    - *all-init
+
+.do-init: &do-init
+  variables:
+    DO_REGION: $[[ inputs.region ]]
+    DO_INSTANCE_TYPE: $[[ inputs.instance-type ]]
+  rules:
+    - if: '"$[[ inputs.cloud-provider ]]" == "do" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+      when: manual
+  before_script:
+    - declare -a VARS=( 'DO_REGION' 'DO_INSTANCE_TYPE' 'DO_TOKEN' )
     - *all-init
 
 aws-provision:
   <<: *aws-init
+  extends: [.provision-instance-template]
+
+do-provision:
+  <<: *do-init
   extends: [.provision-instance-template]
 
 .tear-down-template:
@@ -144,6 +159,10 @@ aws-provision:
 
 aws-tear-down:
   <<: *aws-init
+  extends: [.tear-down-template]
+
+do-tear-down:
+  <<: *do-init
   extends: [.tear-down-template]
 
 .remote-access-template:
@@ -218,8 +237,24 @@ aws-outline-install:
   variables:
     SSH_USER: $AWS_SSH_USER
 
+do-outline-install:
+  <<: *outline-install
+  rules:
+    - if: '"$[[ inputs.cloud-provider ]]" == "do" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+      when: manual
+  extends: .remote-access-template
+  variables:
+    SSH_USER: $DO_SSH_USER
+
 aws-outline-key-generate:
   extends: [ .outline-key-template ]
   rules:
     - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
+
+do-outline-key-generate:
+  extends: [ .outline-key-template ]
+  rules:
+    - if: '"$[[ inputs.cloud-provider ]]" == "do" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+      when: manual
+
