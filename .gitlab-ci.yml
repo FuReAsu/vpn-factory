@@ -112,9 +112,9 @@ variables:
 
 aws-provision:
   <<: *aws-init
-  extends: .provision-instance-template
+  extends: [.provision-instance-template]
 
-.tear-down-defaults: &tear-down-defaults
+.tear-down-template:
   needs:
     - job: $[[ inputs.cloud-provider ]]-provision
       artifacts: false
@@ -143,7 +143,8 @@ aws-provision:
   manual_confirmation: "Are you sure you want to stop the $[[ inputs.cloud-provider ]]-$[[ inputs.region ]] environment"
 
 aws-tear-down:
-  <<: [*aws-init, *tear-down-defaults]
+  <<: *aws-init
+  extends: [.tear-down-template]
 
 .remote-access-template:
   image: fureasu346/pipeline-util:v1
@@ -186,7 +187,7 @@ aws-tear-down:
       - ${CI_PROJECT_DIR}/outline
     expire_in: 30 days
 
-.outline-key-generate:
+.outline-key-template:
   stage: generate
   image: fureasu346/pipeline-util:v1
   needs:
@@ -218,7 +219,7 @@ aws-outline-install:
     SSH_USER: $AWS_SSH_USER
 
 aws-outline-key-generate:
-  extends: .outline-key-generate
+  extends: [ .outline-key-template ]
   rules:
     - if: '"$[[ inputs.cloud-provider ]]" == "aws" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
       when: manual
