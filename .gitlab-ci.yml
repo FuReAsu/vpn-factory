@@ -64,7 +64,7 @@ include:
   - local: 'pipeline/outline-templates.yaml'
   - local: 'pipeline/aws.yaml'
     rules:
-      - if: $[[ inputs.cloud-provider ]] == 'aws'
+      - if: '$[[ inputs.cloud-provider ]] == "aws"'
     inputs:
       cloud-provider: $[[ inputs.cloud-provider ]]
       region: $[[ inputs.region ]]
