@@ -24,9 +24,6 @@
   image: 
     name: fureasu346/opentofu:v1.11.5
     entrypoint: [""]
-  environment:
-    name: ${PROVIDER}-${REGION}
-    on_stop: ${PROVIDER}-tear-down
   script:
     - tofu init -input=false -reconfigure
     - tofu plan -input=false -out ${CI_PIPELINE_ID}.tfplan
@@ -46,9 +43,6 @@
     - job: ${PROVIDER}-provision
       artifacts: false
       optional: false
-  environment:
-    name: ${PROVIDER}-${REGION}
-    action: stop
   stage: destroy
   image: 
     name: fureasu346/opentofu:v1.11.5

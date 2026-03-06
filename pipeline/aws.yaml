@@ -11,12 +11,18 @@
     PROVIDER_VARS: "AWS_REGION,AWS_INSTANCE_TYPE,AWS_ACCESS_KEY,AWS_SECRET_KEY,AWS_VPC_CIDR"
 
 aws-provision:
+  environment:
+    name: aws-${REGION}
+    on_stop: aws-tear-down
   extends:
     - .aws-tofu-template
     - .prepare-tofu-template
     - .provision-tofu-template
 
 aws-tear-down:
+  environment:
+    name: aws-${REGION}
+    action: stop
   extends:
     - .aws-tofu-template
     - .prepare-tofu-template
