@@ -116,7 +116,7 @@ aws-provision:
     - .prepare-tofu-template
     - .provision-tofu-template
 
-.destory-tofu-template:
+.destroy-tofu-template:
   needs:
     - job: $[[ inputs.cloud-provider ]]-provision
       artifacts: false
