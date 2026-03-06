@@ -20,6 +20,10 @@ aws-provision:
     - .provision-tofu-template
 
 aws-tear-down:
+  needs:
+    - job: aws-provision
+      artifacts: false
+      optional: false
   environment:
     name: aws-${REGION}
     action: stop

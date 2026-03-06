@@ -39,10 +39,6 @@
       - ${CI_PROJECT_DIR}/${PROVIDER}/.terraform
 
 .destroy-tofu-template:
-  needs:
-    - job: ${PROVIDER}-provision
-      artifacts: false
-      optional: false
   stage: destroy
   image: 
     name: fureasu346/opentofu:v1.11.5
