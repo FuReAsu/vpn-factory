@@ -19,6 +19,10 @@ echo "==> [INSTALL] Running Outline installer (this may take a minute)..."
 
 yes | sudo bash $INSTALL_FILE --api-port "$API_PORT" --keys-port "$KEYS_PORT" > $LOG_FILE
 
+if ! [ "$?" ]; then
+    echo "[ERROR] Installation failed... Please check $LOG_FILE"
+fi
+
 echo "==> [EXTRACT] Parsing API configuration..."
 RAW_CONFIG=$(cat "$LOG_FILE" | grep "apiUrl" || true)
 
