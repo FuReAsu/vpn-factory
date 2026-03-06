@@ -1,0 +1,53 @@
+.do-rules: &do-rules
+  rules:
+  - if: '$PROVIDER == "do" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+    when: manual
+
+.do-tofu-template:
+  <<: *do-rules
+  variables:
+    AWS_REGION: "${REGION}"
+    AWS_INSTANCE_TYPE: "${INSTANCE_TYPE}"
+    PROVIDER_VARS: "DO_REGION,DO_INSTANCE_TYPE,DO_TOKEN"
+
+do-provision:
+  environment:
+    name: do-${REGION}
+    on_stop: do-tear-down
+  extends:
+    - .do-tofu-template
+    - .prepare-tofu-template
+    - .provision-tofu-template
+
+do-tear-down:
+  needs:
+    - job: do-provision
+      artifacts: false
+      optional: false
+  environment:
+    name: do-${REGION}
+    action: stop
+  extends:
+    - .do-tofu-template
+    - .prepare-tofu-template
+    - .destroy-tofu-template
+
+do-outline-install:
+  needs:
+    - job: do-provision
+      artifacts: true
+      optional: false
+  <<: *do-rules
+  extends: 
+    - .outline-install-template
+    - .remote-access-template
+  variables:
+    SSH_USER: $DO_SSH_USER
+
+do-outline-key-generate:
+  needs:
+    - job: do-outline-install
+      artifacts: true
+      optional: false
+  <<: *do-rules
+  extends: [ .outline-key-template ]
