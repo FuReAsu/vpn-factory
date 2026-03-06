@@ -1,0 +1,19 @@
+.remote-access-template:
+  image: fureasu346/pipeline-util:v1
+  needs:
+    - job: $[[ inputs.cloud-provider ]]-provision
+      artifacts: true
+      optional: false
+  before_script:
+    - echo "Configuring ssh"
+    - INFO_FILE="${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/${CI_PIPELINE_ID}.json"
+    - INSTANCE_IP=$(jq -r '.values.outputs.instance_ip.value' ${INFO_FILE})
+    - LOCAL_KEY="$HOME/.ssh/vpn-factory-key.priv"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "$SSH_PRIV_KEY" > $LOCAL_KEY && chmod 400 $LOCAL_KEY
+    - echo "Testing private key file"
+    - ssh-keygen -y -f $LOCAL_KEY > /dev/null
+    - ssh-keyscan -H "$INSTANCE_IP" >> ~/.ssh/known_hosts
+    - printf "%b" "Host instance\n\tHostName $INSTANCE_IP\n\tUser $SSH_USER\n\tPort 22\n\tIdentityFile $LOCAL_KEY\n" > ~/.ssh/config
+    - echo "Testing ssh connection"
+    - ssh -o BatchMode=yes instance uptime

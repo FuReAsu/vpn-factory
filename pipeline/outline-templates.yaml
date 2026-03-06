@@ -1,0 +1,42 @@
+.outline-install-template: 
+  stage: install
+  script:
+    - API_PORT=$(jq -r '.values.outputs.randomized_ports.value[0]' ${INFO_FILE})
+    - KEYS_PORT=$(jq -r '.values.outputs.randomized_ports.value[1]' ${INFO_FILE})
+    - echo "Sending script file to remote instance"
+    - scp scripts/install-outline.sh instance:.
+    - ssh instance "
+        API_PORT=$API_PORT
+        KEYS_PORT=$KEYS_PORT
+        bash install-outline.sh
+      "
+    - scp instance:./outline/outline-api.json .
+    - mkdir ${CI_PROJECT_DIR}/outline && mv outline-api.json ${CI_PROJECT_DIR}/outline
+    - echo "Cleaning up install script from remote instance"
+    - ssh instance "rm install-outline.sh"
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/outline
+    expire_in: 30 days
+
+.outline-key-template:
+  stage: generate
+  image: fureasu346/pipeline-util:v1
+  needs:
+    - job: $[[ inputs.cloud-provider ]]-outline-install
+      artifacts: true
+      optional: false
+  variables:
+    KEY_NAMES: "outline-${CI_JOB_ID}"
+  script:
+    - API_URL=$(jq -r '.apiUrl' ${CI_PROJECT_DIR}/outline/outline-api.json )
+    - IFS=',' read -ra KEYS <<< "$KEY_NAMES"
+    - |
+      for KEY in "${KEYS[@]}"; do
+        echo "Generating key for $KEY"
+        API_URL="$API_URL" KEY_NAME="$KEY" bash scripts/get-outline-key.sh
+      done
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/outline
+    expire_in: 30 days

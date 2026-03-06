@@ -1,0 +1,70 @@
+.prepare-tofu-template:
+  before_script:
+    - cd ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]
+    - IFS=',' read -r -a VARS <<< "$PROVIDER_VARS"
+    - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
+    - echo "Setting global variables"
+    - export TF_VAR_gl_user="$CI_USER"
+    - export TF_VAR_gl_pat="$CI_PAT"
+    - |
+      for VAR in "${VARS[@]}"; do
+        if [ -n "${!VAR+x}" ]; then
+          echo "$VAR is set"
+          tfvar="${VAR#AWS_}"
+          tfvar_lc="${tfvar,,}"
+          export TF_VAR_${tfvar_lc}="${!VAR}"
+        else
+          echo "$VAR is not set. Using default"
+        fi
+      done
+
+.provision-tofu-template:
+  needs: []
+  stage: provision
+  image: 
+    name: fureasu346/opentofu:v1.11.5
+    entrypoint: [""]
+  environment:
+    name: $[[ inputs.cloud-provider ]]-$[[ inputs.region ]]
+    on_stop: $[[ inputs.cloud-provider ]]-tear-down
+  script:
+    - tofu init -input=false -reconfigure
+    - tofu plan -input=false -out ${CI_PIPELINE_ID}.tfplan
+    - tofu apply -input=false ${CI_PIPELINE_ID}.tfplan
+    - tofu show -json > ${CI_PIPELINE_ID}.json
+  artifacts:
+    paths:
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/${CI_PIPELINE_ID}.json
+    expire_in: 30 days
+  cache:
+    key: tofu-files
+    paths:
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/.terraform
+
+.destroy-tofu-template:
+  needs:
+    - job: $[[ inputs.cloud-provider ]]-provision
+      artifacts: false
+      optional: false
+  environment:
+    name: $[[ inputs.cloud-provider ]]-$[[ inputs.region ]]
+    action: stop
+  stage: destroy
+  image: 
+    name: fureasu346/opentofu:v1.11.5
+    entrypoint: [""]
+  script:
+    - tofu init -input=false -reconfigure
+    - tofu plan -input=false -destroy -out ${CI_PIPELINE_ID}.destroy.tfplan
+    - tofu apply -input=false ${CI_PIPELINE_ID}.destroy.tfplan
+    - echo "Deleting state file"
+    - |
+      curl --request DELETE \
+        --header "Private-Token: $CI_PAT" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_PIPELINE_ID}"
+    - echo "Deployment torn down and tfstate file deleted"
+  cache:
+    key: tofu-files
+    paths:
+      - ${CI_PROJECT_DIR}/$[[ inputs.cloud-provider ]]/.terraform
+  manual_confirmation: "Are you sure you want to stop the $[[ inputs.cloud-provider ]]-$[[ inputs.region ]] environment"
