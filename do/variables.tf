@@ -8,7 +8,7 @@ variable "instance_type" {
   default = "s-1vcpu-1gb"
 }
 
-variable "do_token" {
+variable "token" {
   description = "Digital Ocean Personal Access Token"
 }
 
