@@ -58,7 +58,7 @@ variables:
   GCP_SSH_USER: "vpn-factory"
   DO_SSH_USER: "root"
 
-.provision-instance-template:
+.provision-tofu-template:
   needs: []
   stage: provision
   image: 
