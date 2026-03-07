@@ -1,5 +1,5 @@
 output "instance_ip" {
-  value = digitalocean_droplet.vpn-factory-key.ipv4_address
+  value = digitalocean_droplet.vpn-factory-server.ipv4_address
 }
 
 output "randomized_ports" {
