@@ -13,7 +13,9 @@ ID=$(jq -r '.id' $KEY_FILE)
 curl -k -s -X PUT "$API_URL/access-keys/$ID/name" \
 	-d "name=$KEY_NAME"
 
-echo "==> [SUCCESS] ${KEY_NAME} key generated..."
-KEY=$(jq -r '.accessUrl' $KEY_FILE)
+echo "==> [FETCH] Retrieving updated key data with name..."
+curl -k -s -X GET "$API_URL/access-keys/$ID" > "$KEY_FILE"
+
+echo "==> [SUCCESS] ${KEY_NAME} key generated and saved to ${KEY_FILE}"
 
 echo $KEY
