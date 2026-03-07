@@ -58,4 +58,4 @@
     key: tofu-files
     paths:
       - ${CI_PROJECT_DIR}/${PROVIDER}/.terraform
-  manual_confirmation: "Are you sure you want to stop the ${PROVIDER}-${REGION} environment"
+  manual_confirmation: "Are you sure you want to stop the $[[ inputs.cloud-provider ]]-$[[ inputs.region ]] environment"
