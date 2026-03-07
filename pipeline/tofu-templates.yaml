@@ -6,11 +6,12 @@
     - echo "Setting global variables"
     - export TF_VAR_gl_user="$CI_USER"
     - export TF_VAR_gl_pat="$CI_PAT"
+    - diff="${PROVIDER^^}"
     - |
       for VAR in "${VARS[@]}"; do
         if [ -n "${!VAR+x}" ]; then
           echo "$VAR is set"
-          tfvar="${VAR#AWS_}"
+          tfvar="${VAR#${diff}_}"
           tfvar_lc="${tfvar,,}"
           export TF_VAR_${tfvar_lc}="${!VAR}"
         else
