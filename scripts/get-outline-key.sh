@@ -19,4 +19,6 @@ echo "==> [FETCH] Retrieving updated key data with name..."
 curl -k -s -X GET "$API_URL/access-keys/$ID" > "$KEY_FILE"
 
 echo "==> [SUCCESS] ${KEY_NAME} key generated and saved to ${KEY_FILE}"
+
+KEY=$(jq -r '.accessUrl' $KEY_FILE)
 echo $KEY
