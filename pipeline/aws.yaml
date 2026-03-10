@@ -51,3 +51,27 @@ aws-outline-key-generate:
       optional: false
   <<: *aws-rules
   extends: [ .outline-key-template ]
+
+aws-ovpn-install:
+  needs:
+    - job: aws-provision
+      artifacts: true
+      optional: false
+  <<: *aws-rules
+  extends:
+    - .ovpn-install-template
+    - .remote-access-template
+  variables:
+    SSH_USER: $AWS_SSH_USER
+
+aws-ovpn-key-generate:
+  needs:
+    - job: aws-ovpn-install
+      artifacts: true
+      optional: false
+  <<: *aws-rules
+  extends:
+    - .ovpn-install-template
+    - .remote-access-template
+  variables:
+    SSH_USER: $AWS_SSH_USER
