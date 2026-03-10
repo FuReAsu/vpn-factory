@@ -40,7 +40,7 @@
         -d text="<b>Provider</b> ==> <code>${PROVIDER}</code>
       <b>Region</b> ==> <code>${REGION}</code>
       <b>PIPELINE_ID</b> ==> <code>${CI_PIPELINE_ID}</code>
-      <b>VPN</b> ==> outline
+      <b>VPN</b> ==> Outline
       <i>Keys are as below:</i>" \
         https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
     - echo "Sending keys to telegram..."
