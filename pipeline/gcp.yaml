@@ -1,0 +1,53 @@
+gcp-rules: &gcp-rules
+  rules:
+  - if: '$PROVIDER == "gcp" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
+    when: manual
+
+.gcp-tofu-template:
+  <<: *gcp-rules
+  variables:
+    GCP_REGION: "${REGION}"
+    GCP_INSTANCE_TYPE: "${INSTANCE_TYPE}"
+    PROVIDER_VARS: "GCP_REGION,GCP_INSTANCE_TYPE,GCP_CREDENTIALS"
+
+gcp-provision:
+  environment:
+    name: gcp-${REGION}
+    on_stop: gcp-tear-down
+  extends:
+    - .gcp-tofu-template
+    - .prepare-tofu-template
+    - .provision-tofu-template
+
+gcp-tear-down:
+  needs:
+    - job: gcp-provision
+      artifacts: false
+      optional: false
+  environment:
+    name: gcp-${REGION}
+    action: stop
+  extends:
+    - .gcp-tofu-template
+    - .prepare-tofu-template
+    - .destroy-tofu-template
+
+gcp-outline-install:
+  needs:
+    - job: gcp-provision
+      artifacts: true
+      optional: false
+  <<: *gcp-rules
+  extends: 
+    - .outline-install-template
+    - .remote-access-template
+  variables:
+    SSH_USER: $GCP_SSH_USER
+
+gcp-outline-key-generate:
+  needs:
+    - job: gcp-outline-install
+      artifacts: true
+      optional: false
+  <<: *gcp-rules
+  extends: [ .outline-key-template ]
