@@ -1,0 +1,5 @@
+project=""
+region=""
+instance_type=""
+gl_user=""
+gl_pat=""
