@@ -4,7 +4,7 @@
     - API_PORT=$(jq -r '.values.outputs.randomized_ports.value[0]' ${INFO_FILE})
     - KEYS_PORT=$(jq -r '.values.outputs.randomized_ports.value[1]' ${INFO_FILE})
     - echo "Sending script file to remote instance"
-    - scp scripts/install-outline.sh instance:.
+    - scp scripts/outline/install-outline.sh instance:.
     - ssh instance "
         API_PORT=$API_PORT
         KEYS_PORT=$KEYS_PORT
@@ -30,7 +30,7 @@
     - |
       for KEY in "${KEYS[@]}"; do
         echo "Generating key for $KEY"
-        API_URL="$API_URL" KEY_NAME="$KEY" bash scripts/get-outline-key.sh
+        API_URL="$API_URL" KEY_NAME="$KEY" bash scripts/outline/get-outline-key.sh
       done
     - echo "Sending environment information to telegram..."
     - |
