@@ -1,4 +1,4 @@
-gcp-rules: &gcp-rules
+.gcp-rules: &gcp-rules
   rules:
   - if: '$PROVIDER == "gcp" && ($CI_PIPELINE_SOURCE == "web" || $CI_PIPELINE_SOURCE == "api")'
     when: manual
