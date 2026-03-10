@@ -8,7 +8,7 @@ echo "==> [CONFIG] Checking required variables..."
 : "${KEY_NAME:?Missing KEY_NAME}"
 
 echo "==> [GENERATE] Generating OVPN client key..."
-sudo bash ${INSTALL_FILE} client add ${KEY_NAME}
+sudo bash ${INSTALL_FILE} client add ${KEY_NAME} > /dev/null
 
 mv $HOME/${KEY_NAME}.ovpn ${KEY_DIR}
 
