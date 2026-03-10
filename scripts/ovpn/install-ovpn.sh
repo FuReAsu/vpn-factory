@@ -22,4 +22,4 @@ if ! [ "$?" ]; then
 	exit 1
 fi
 
-echo "[SUCCESS] OVPN server installation successful..."
+echo "==> [SUCCESS] OVPN server installation successful..."
