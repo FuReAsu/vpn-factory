@@ -24,6 +24,8 @@
       for KEY in "${KEYS[@]}"; do
         echo "Generating key for $KEY"
         ssh instance "KEY_NAME=$KEY bash get-ovpn-key.sh"
+        echp "Getting the key file from remote instance"
+        scp instance:~/keys/ovpn/$KEY.ovpn ${CI_PROJECT_DIR}/keys/ovpn/$KEY.ovpn
       done
     - echo "Sending environment information to telegram..."
     - |
