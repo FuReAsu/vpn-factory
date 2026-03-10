@@ -1,3 +1,7 @@
+variable "credentials" {
+  description = "gcloud auth key"
+}
+
 variable "project" {
   description = "Project ID"
 }
