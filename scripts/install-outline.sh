@@ -11,7 +11,7 @@ echo "==> [CONFIG] Checking required variables..."
 
 echo "==> [DOWNLOAD] Fetching Outline installation script..."
 if ! curl -sSL https://raw.githubusercontent.com/Jigsaw-Code/outline-apps/master/server_manager/install_scripts/install_server.sh -o $INSTALL_FILE; then
-    echo "Falled to download installation script."
+    echo "Failed to download installation script."
     exit 1
 fi
 
