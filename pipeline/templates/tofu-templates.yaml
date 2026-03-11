@@ -1,6 +1,6 @@
 .prepare-tofu-template:
   before_script:
-    - cd ${CI_PROJECT_DIR}/${PROVIDER}
+    - cd ${CI_PROJECT_DIR}/tofu/${PROVIDER}
     - IFS=',' read -r -a VARS <<< "$PROVIDER_VARS"
     - sed -i "s|dev|$CI_PIPELINE_ID|" backend.tf
     - echo "Setting global variables"
@@ -32,12 +32,12 @@
     - tofu show -json > ${CI_PIPELINE_ID}.json
   artifacts:
     paths:
-      - ${CI_PROJECT_DIR}/${PROVIDER}/${CI_PIPELINE_ID}.json
+      - ${CI_PROJECT_DIR}/tofu/${PROVIDER}/${CI_PIPELINE_ID}.json
     expire_in: 30 days
   cache:
     key: tofu-files
     paths:
-      - ${CI_PROJECT_DIR}/${PROVIDER}/.terraform
+      - ${CI_PROJECT_DIR}/tofu/${PROVIDER}/.terraform
 
 .destroy-tofu-template:
   stage: destroy
@@ -75,5 +75,5 @@
   cache:
     key: tofu-files
     paths:
-      - ${CI_PROJECT_DIR}/${PROVIDER}/.terraform
+      - ${CI_PROJECT_DIR}/tofu/${PROVIDER}/.terraform
   manual_confirmation: "Are you sure you want to stop the vpn environment from this pipeline"
