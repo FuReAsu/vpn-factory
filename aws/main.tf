@@ -1,6 +1,11 @@
 //Generate uuid for seeding
 resource "random_uuid" "seed" {}
 
+//For resource names
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 //Get ami id
 data "aws_ami" "ubuntu" {
   owners = ["099720109477"]
@@ -40,7 +45,7 @@ resource "random_shuffle" "vpn_ports" {
 
 //Create Keypair
 resource "aws_key_pair" "vpn-factory-key" {
-  key_name = "vpn-factory-key"
+  key_name = "vpn-factory-key-${random_id.suffix.hex}"
   public_key = file("../ssh-keys/vpn-factory-key.pub")
 }
 
@@ -48,7 +53,7 @@ resource "aws_key_pair" "vpn-factory-key" {
 resource "aws_vpc" "vpn-factory-vpc" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "vpn-factory-vpc"
+    Name = "vpn-factory-vpc-${random_id.suffix.hex}"
   }
 }
 
@@ -57,14 +62,14 @@ resource "aws_subnet" "vpn-factory-subnet" {
   cidr_block = var.vpc_cidr
   map_public_ip_on_launch = true
   tags = {
-    Name = "vpn-factory-subnet"
+    Name = "vpn-factory-subnet-${random_id.suffix.hex}"
   }
 }
 
 resource "aws_internet_gateway" "vpn-factory-igw" {
   vpc_id = aws_vpc.vpn-factory-vpc.id
   tags = {
-    Name = "vpn-factory-igw"
+    Name = "vpn-factory-igw-${random_id.suffix.hex}"
   }
 }
 
@@ -75,7 +80,7 @@ resource "aws_route_table" "vpn-factory-rtb" {
     gateway_id = aws_internet_gateway.vpn-factory-igw.id
   }
   tags = {
-    Name = "vpn-factory-rtb"
+    Name = "vpn-factory-rtb-${random_id.suffix.hex}"
   }
 }
 
@@ -85,11 +90,11 @@ resource "aws_route_table_association" "vpn-factory-rtb-asso" {
 }
 
 resource "aws_security_group" "vpn-factory-sg" {
-  name = "vpn-factory-sg"
+  name = "vpn-factory-sg-${random_id.suffix.hex}"
   description = "SG for VPN server"
   vpc_id = aws_vpc.vpn-factory-vpc.id
   tags = {
-    Name = "vpn-factory-sg"
+    Name = "vpn-factory-sg-${random_id.suffix.hex}"
   }
 }
 
@@ -128,7 +133,7 @@ resource "aws_instance" "vpn-factory-server" {
   vpc_security_group_ids = [aws_security_group.vpn-factory-sg.id]
   key_name = aws_key_pair.vpn-factory-key.key_name
   tags = {
-    Name = "vpn-factory-server"
+    Name = "vpn-factory-server-${random_id.suffix.hex}"
   }
   lifecycle {
     ignore_changes = [ami]
