@@ -1,14 +1,25 @@
-# VPN Factory
+# VPN Factory (Multicloud provisioning with GitLab)
 
-Create vpn servers from anywhere (with pipelines)
+Create vpn servers from anywhere (with pipelines), even from your phone. Made to automate the process of provisioning cloud instances and hosting VPN servers but this project is mainly intended for terraform and gitlab CI POC.
 
 ## Components
 
 - OpenTofu
 - Gitlab CI Pipeline
 - Scripts to install vpn servers and generate keys
+- Telegram BOT API calls to notify environment changes and key delivery.
 
-## Flow
+## Base Images
+
+Custom base images are used for the pipeline jobs.
+
+|Image Name|Dockerhub|Source|
+|---|---|---|
+|fureasu346/opentofu:v1.11.5|[link](https://hub.docker.com/repository/docker/fureasu346/opentofu/tags/v1.11.5)|[repo link](https://github.com/FuReAsu/docker/tree/main/opentofu)|
+|fureasu346/pipeline-util:v1|[link](https://hub.docker.com/repository/docker/fureasu346/pipeline-util/tags/v1)|[repo link](https://github.com/FuReAsu/docker/tree/main/pipeline-util)|
+
+
+## Pipeline Flow
 
 - Provision cloud compute instances
 - Install VPN Servers 
