@@ -9,9 +9,9 @@ Create vpn servers from anywhere (with pipelines), even from your phone. Made to
 - Scripts to install vpn servers and generate keys
 - Telegram BOT API calls to notify environment changes and key delivery.
 
-## Base Images
+## Container Images
 
-Custom base images are used for the pipeline jobs.
+Custom container images are used for the pipeline jobs.
 
 |Image Name|Dockerhub|Source|
 |---|---|---|
