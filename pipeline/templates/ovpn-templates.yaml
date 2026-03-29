@@ -52,7 +52,7 @@
           https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
         curl -s -F chat_id="${TELEGRAM_CHAT_ID}" \
           -F document=@"${CI_PROJECT_DIR}/keys/ovpn/${KEY_FILE}" \
-          https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument
+          https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument > /dev/null
         sleep 2
       done
     - echo "Successfully sent keys to telegram"
