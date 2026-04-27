@@ -12,7 +12,7 @@
 
 aws-provision:
   environment:
-    name: aws-${REGION}
+    name: ${ENVIRONMENT_NAME}
     on_stop: aws-tear-down
   extends:
     - .aws-tofu-template
@@ -25,7 +25,7 @@ aws-tear-down:
       artifacts: false
       optional: false
   environment:
-    name: aws-${REGION}
+    name: ${ENVIRONMENT_NAME}
     action: stop
   extends:
     - .aws-tofu-template

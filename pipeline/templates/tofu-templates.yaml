@@ -30,6 +30,13 @@
     - tofu plan -input=false -out ${CI_PIPELINE_ID}.tfplan
     - tofu apply -input=false ${CI_PIPELINE_ID}.tfplan
     - tofu show -json > ${CI_PIPELINE_ID}.json
+    - echo "Informing environment creation"
+    - |
+      curl -s -X POST \
+        -d chat_id="${TELEGRAM_CHAT_ID}" \
+        -d text="Environment [${CI_ENVIRONMENT_NAME}] has been provisioned at $(date)..." \
+        https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
+
   artifacts:
     paths:
       - ${CI_PROJECT_DIR}/tofu/${PROVIDER}/${CI_PIPELINE_ID}.json

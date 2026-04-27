@@ -60,6 +60,7 @@ variables:
   PROVIDER: $[[ inputs.cloud-provider ]]
   REGION: $[[ inputs.region ]]
   INSTANCE_TYPE: $[[ inputs.instance-type ]]
+  ENVIRONMENT_NAME: $[[ inputs.cloud-provider ]]-$[[ inputs.region ]]-${CI_PIPELINE_IID}
 
 include:
   - local: 'pipeline/providers/*.yaml'
