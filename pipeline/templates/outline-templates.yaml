@@ -32,6 +32,8 @@
         echo "Generating key for $KEY"
         API_URL="$API_URL" KEY_NAME="$KEY" bash scripts/outline/get-outline-key.sh
       done
+    - INFO_FILE="${CI_PROJECT_DIR}/tofu/${PROVIDER}/${CI_PIPELINE_ID}.json"
+    - INSTANCE_IP=$(jq -r '.values.outputs.instance_ip.value' ${INFO_FILE})
     - echo "Sending environment information to telegram..."
     - |
       curl -s -X POST \
@@ -40,6 +42,7 @@
         -d text="<b>Provider</b> ==> <code>${PROVIDER}</code>
       <b>Region</b> ==> <code>${REGION}</code>
       <b>PIPELINE_ID</b> ==> <code>${CI_PIPELINE_ID}</code>
+      <b>Instance_IP</b> ==> <code>${INSTANCE_IP}</code>
       <b>VPN</b> ==> Outline
       <i>Keys are as below:</i>" \
         https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null

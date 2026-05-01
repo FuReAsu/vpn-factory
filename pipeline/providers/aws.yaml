@@ -49,6 +49,9 @@ aws-outline-key-generate:
     - job: aws-outline-install
       artifacts: true
       optional: false
+    - job: aws-provision
+      artifacts: true
+      optional: false
   <<: *aws-rules
   extends: [ .outline-key-template ]
 

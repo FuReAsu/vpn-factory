@@ -49,6 +49,9 @@ gcp-outline-key-generate:
     - job: gcp-outline-install
       artifacts: true
       optional: false
+    - job: gcp-provision
+      artifacts: true
+      optional: false
   <<: *gcp-rules
   extends: [ .outline-key-template ]
 

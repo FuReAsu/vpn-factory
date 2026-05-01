@@ -49,6 +49,9 @@ do-outline-key-generate:
     - job: do-outline-install
       artifacts: true
       optional: false
+    - job: do-provision
+      artifacts: true
+      optional: false
   <<: *do-rules
   extends: [ .outline-key-template ]
 
