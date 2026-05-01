@@ -25,3 +25,9 @@ variable "gl_pat" {
   type = string
   description = "gitlab pat for backend"
 }
+
+variable "network_tier" {
+  type = string
+  description = "gcloud network tier to use for instance"
+  default = "STANDARD"
+}

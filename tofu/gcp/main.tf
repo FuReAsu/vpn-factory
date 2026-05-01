@@ -76,6 +76,7 @@ resource "google_compute_instance" "vpn-factory-server" {
   network_interface {
     network = google_compute_network.vpn-factory-vpc.id
     access_config {
+      network_tier = var.network_tier
     }
   }
   can_ip_forward = true
