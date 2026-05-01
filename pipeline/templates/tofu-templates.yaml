@@ -36,8 +36,8 @@
       curl -s -X POST \
         -d chat_id="${TELEGRAM_CHAT_ID}" \
         -d parse_mode="HTML" \
-        -d text="<b>Environment:</b> <code>${CI_ENVIRONMENT_NAME}</code>%0A<b>Provisioned at:</b> $(date +%d-%m-%Y\ %H:%M:%S\ %Z)%0A<b>Instance IP:</b> <code>${INSTANCE_IP}</code>" \
-        https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
+        -d text="Environment <b>${CI_ENVIRONMENT_NAME}</b> has been provisioned at <i>$(date +%d-%m-%Y\ %H:%M:%S\ %Z)</i>.%0A<b>Instance IP:</b> <code>${INSTANCE_IP}</code>" \
+          https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
 
   artifacts:
     paths:
