@@ -31,10 +31,11 @@
     - tofu apply -input=false ${CI_PIPELINE_ID}.tfplan
     - tofu show -json > ${CI_PIPELINE_ID}.json
     - echo "Informing environment creation"
+    - INSTANCE_IP=$(jq -r '.values.outputs.instance_ip.value' ${CI_PIPELINE_ID}.json)
     - |
       curl -s -X POST \
         -d chat_id="${TELEGRAM_CHAT_ID}" \
-        -d text="Environment [${CI_ENVIRONMENT_NAME}] has been provisioned at $(date)..." \
+        -d text="Environment [${CI_ENVIRONMENT_NAME}] has been provisioned at [$(date +%d-%m-%Y\ %H:%M:%S\ %Z)]. The instance is available at [${INSTANCE_IP}]" \
         https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage > /dev/null
 
   artifacts:
