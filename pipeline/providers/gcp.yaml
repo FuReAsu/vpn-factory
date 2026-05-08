@@ -23,7 +23,7 @@ gcp-tear-down:
   needs:
     - job: gcp-provision
       artifacts: false
-      optional: false
+      optional: true
   environment:
     name: ${ENVIRONMENT_NAME}
     action: stop
