@@ -32,17 +32,29 @@ resource "random_shuffle" "vpn_ports" {
   }
 }
 
+//SSH public key import logic
+data "digitalocean_ssh_key" "existing" {
+  count = var.import_ssh_key ? 0 : 1
+  name = "vpn-factory-key"
+}
+
 resource "digitalocean_ssh_key" "vpn-factory-key" {
-  name = "vpn-factory-key-${random_id.suffix.hex}"
+  count = var.import_ssh_key ? 1 : 0
+  name = "vpn-factory-key"
   public_key = file("../../ssh-keys/vpn-factory-key.pub")
 }
+
+locals {
+  instance_ssh_key_id = var.import_ssh_key ? digitalocean_ssh_key.vpn-factory-key[0].id : data.digitalocean_ssh_key.existing[0].id
+}
+
 
 resource "digitalocean_droplet" "vpn-factory-server" {
   image = "ubuntu-24-04-x64"
   name = "vpn-factory-server-${random_id.suffix.hex}"
   region = var.region
   size = var.instance_type
-  ssh_keys = [digitalocean_ssh_key.vpn-factory-key.fingerprint]
+  ssh_keys = [local.instance_ssh_key_id]
 }
 
 resource "digitalocean_firewall" "vpn-factory-firewall" {

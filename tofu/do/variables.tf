@@ -21,3 +21,9 @@ variable "gl_pat" {
   type = string
   description = "gitlab pat for backend"
 }
+
+variable "import_ssh_key" {
+  type = bool
+  default = true
+  description = "Set to false if another DO instance in the same account is already running"
+}
